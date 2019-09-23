@@ -1,15 +1,3 @@
-
-// d3.json("samples.json").then(function(data) {
-//     const info = data;
-//   });
-
-// info.map(i =>{
-//     console.log(i.samples)
-// }
-    
-//     )
-// //console.log(info.samples) 
-
 const filePath = "././samples.json";
 
 //Read samples data file
@@ -21,6 +9,13 @@ d3.json(filePath).then(function(data) {
 
     //Populate the dropdown
     var selectDropdown = d3.select("#selDataset");
+    
+    //Set default option
+    selectDropdown.append("option")
+    .attr("disabled",true)
+    .attr("selected", true)
+    .text("Select...");
+
     Object.entries(datasetNames).forEach(([key, value]) => {
         selectDropdown.append("option").attr("value", key).text(value);
     })
@@ -31,10 +26,7 @@ d3.json(filePath).then(function(data) {
 
 
 function optionChanged(selectedValue){
-    console.log(selectedValue);
-    //console.log(dataset);
-    // console.log(dataset.metadata[selectedValue])
-
+    
     d3.json(filePath).then(function(data) {
 
         var dataset = data;
@@ -47,35 +39,36 @@ function optionChanged(selectedValue){
         Object.entries(datasetMetdata).forEach(([key, value]) => {
             mergedMetadata +=  key + " : " + value + "<br>"
         })
-        d3.select("#sample-metadata").html(mergedMetadata)
+        d3.select("#sample-metadata").html(mergedMetadata);
 
 
         //Retrieve Samples info for selected individual
-        var datasetSamples = dataset.samples[selectedValue]
+        var datasetSamples = dataset.samples[selectedValue];
 
-        var otuIDs = datasetSamples.otu_ids.slice(0,10).reverse()
+        var otuIDs = datasetSamples.otu_ids.slice(0,10).reverse();
 
-        var otuIDsBar =  otuIDs.map((val, index) =>{
-            //otuIDs[index] = 'OTU ' + val
-            return 'OTU ' + val;
+        var sampleValues = datasetSamples.sample_values.slice(0,10).reverse();
+        var otuLabels = datasetSamples.otu_labels.slice(0,10).reverse();
 
-        })
-        var sampleValues = datasetSamples.sample_values.slice(0,10).reverse()
-        var otuLabels = datasetSamples.otu_labels.slice(0,10).reverse()
 
-        
+        //Add breaks to the list for ease of readability
+        var modifiedOtuLabels = otuLabels.map(lbl => lbl.replace(/;/g, "<br>"));
+
+
         //Create bar chart
+        //Prefix OTU ID with 'OTU'
+        var otuIDsBar =  otuIDs.map((val, index) => 'OTU ' + val)
         var trace1 = {
             type: "bar",
             x: sampleValues,
             y: otuIDsBar,
-            text: otuLabels,
+            text: modifiedOtuLabels,
             orientation: 'h'
           };
       
           var data = [trace1];
 
-          var layout = xaxis={'type': 'category'}
+          var layout = xaxis={'type': 'category'};
 
           Plotly.newPlot("bar", data, layout);
 
@@ -85,6 +78,7 @@ function optionChanged(selectedValue){
         var trace1 = {
             x: otuIDs,
             y: sampleValues,
+            text: modifiedOtuLabels,
             mode: 'markers',
             marker: {
               color: otuIDs,//['rgb(93, 164, 214)', 'rgb(255, 144, 14)',  'rgb(44, 160, 101)', 'rgb(255, 65, 54)'],
@@ -93,17 +87,17 @@ function optionChanged(selectedValue){
             }
           };
           
-          var data = [trace1];
+        var data = [trace1];
           
-          var layout = {
+        var layout = {
             title: 'Marker Size and Color',
             showlegend: false,
             // height: 600,
             // width: 600
-        xaxis: {
-            dtick: 500
-        },
-          };
+            xaxis: {
+                dtick: 500
+            },
+        };
           
           Plotly.newPlot('bubble', data, layout);
     })
