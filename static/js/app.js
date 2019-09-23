@@ -78,6 +78,34 @@ function optionChanged(selectedValue){
           var layout = xaxis={'type': 'category'}
 
           Plotly.newPlot("bar", data, layout);
+
+
+
+        //Create bubble chart
+        var trace1 = {
+            x: otuIDs,
+            y: sampleValues,
+            mode: 'markers',
+            marker: {
+              color: otuIDs,//['rgb(93, 164, 214)', 'rgb(255, 144, 14)',  'rgb(44, 160, 101)', 'rgb(255, 65, 54)'],
+              opacity: [1, 0.8, 0.6, 0.4],
+              size: sampleValues
+            }
+          };
+          
+          var data = [trace1];
+          
+          var layout = {
+            title: 'Marker Size and Color',
+            showlegend: false,
+            // height: 600,
+            // width: 600
+        xaxis: {
+            dtick: 500
+        },
+          };
+          
+          Plotly.newPlot('bubble', data, layout);
     })
 }
   
